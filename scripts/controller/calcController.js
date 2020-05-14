@@ -85,6 +85,7 @@ class CalcController {
         this.doOperatorOperation("*");
         break;
       case "porcento":
+        this.concatValues("%");
         break;
       case "igual":
         if (this.#isLastKeyEqual) {
@@ -166,25 +167,56 @@ class CalcController {
   }
 
   evalOperation(tempValue, displayValue, operation) {
+    //se tiver % no primeiro operador, realizar logo a conversão para decimal.
+    if (tempValue.includes("%")) {
+      //remove o %
+      tempValue = tempValue.substring(0, tempValue.length - 1);
+      tempValue = parseFloat(tempValue, 10) / 100;
+    } else {
+      tempValue = parseFloat(tempValue, 10);
+    }
+
+    //segundo parametro da operação
+    if (displayValue.includes("%")) {
+      //remove o % e converte em float.
+      displayValue =
+        parseFloat(displayValue.substring(0, displayValue.length - 1), 10) /
+        100;
+
+      if (operation == "+") {
+        displayValue += 1;
+        operation = "*";
+      } else if (operation == "-") {
+        displayValue = 1 - displayValue;
+        operation = "*";
+      }
+    } else {
+      displayValue = parseFloat(displayValue, 10);
+    }
+
     console.log(`tempValue: ${tempValue}
     displayValue ${displayValue}
     operation ${operation}`);
+
     let ops = {
       "+": () => {
-        return parseFloat(tempValue, 10) + parseFloat(displayValue, 10);
+        return tempValue + displayValue;
       },
       "-": () => {
-        return parseFloat(tempValue, 10) - parseFloat(displayValue, 10);
+        return tempValue - displayValue;
       },
       "*": () => {
-        return parseFloat(tempValue, 10) * parseFloat(displayValue, 10);
+        return tempValue * displayValue;
       },
       "/": () => {
-        return parseFloat(tempValue, 10) / parseFloat(displayValue, 10);
+        return tempValue / displayValue;
       },
     };
 
-    this.#displayCalc.innerHTML = ops[operation](tempValue, displayValue);
+    this.#displayCalc.innerHTML = ops[operation](
+      tempValue,
+      displayValue
+    ).toFixed(3);
     this.#tempValue = this.#displayCalc.innerHTML;
     if (!this.#isLastKeyEqual) {
       this.#isLastKeyEqual = true;
@@ -210,6 +242,10 @@ class CalcController {
     }
   }
 
+  /**
+   *
+   * @param {Valor a ser concatenado ao display} value
+   */
   concatValues(value) {
     let newDisplay = this.getDisplayCalc().concat(value);
     this.#displayCalc.innerHTML = newDisplay;
