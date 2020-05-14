@@ -1,1 +1,0 @@
-# Calculadora JavaScript Thomas
