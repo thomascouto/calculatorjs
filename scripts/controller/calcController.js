@@ -103,7 +103,9 @@ class CalcController {
         }
         break;
       case "ponto":
-        this.doNumberOperation(".");
+        if (!this.#displayCalc.innerHTML.includes(".")) {
+          this.doNumberOperation(".");
+        }
         break;
       case "0":
       case "1":
@@ -213,10 +215,7 @@ class CalcController {
       },
     };
 
-    this.#displayCalc.innerHTML = ops[operation](
-      tempValue,
-      displayValue
-    ).toFixed(3);
+    this.#displayCalc.innerHTML = ops[operation](tempValue, displayValue);
     this.#tempValue = this.#displayCalc.innerHTML;
     if (!this.#isLastKeyEqual) {
       this.#isLastKeyEqual = true;
