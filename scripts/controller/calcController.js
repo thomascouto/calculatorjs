@@ -11,6 +11,8 @@ class CalcController {
   #isLastKeyEqual = false;
   #lastOperation = [];
 
+  #keyMap = new Map();
+
   constructor() {
     this.#displayCalc.innerHTML = "0";
     this.setDateTime();
@@ -35,28 +37,24 @@ class CalcController {
       });
     });
 
+    this.#keyMap.set("Enter", "igual");
+    this.#keyMap.set("+", "soma");
+    this.#keyMap.set("-", "subtracao");
+    this.#keyMap.set("*", "multiplicacao");
+    this.#keyMap.set("/", "divisao");
+    this.#keyMap.set("%", "porcento");
+    this.#keyMap.set(".", "ponto");
+    this.#keyMap.set("Escape", "ac");
     this.initKeyboard();
   }
 
   initKeyboard() {
     document.addEventListener("keyup", (e) => {
-      this.execButton(e);
-      let keyMap = new Map();
-      keyMap.set("Enter", "igual");
-      keyMap.set("+", "soma");
-      keyMap.set("-", "subtracao");
-      keyMap.set("*", "multiplicacao");
-      keyMap.set("/", "divisao");
-      keyMap.set("%", "porcento");
-      keyMap.set(".", "ponto");
-      keyMap.set("Escape", "ac");
-
-      if (!isNaN(e.key)) {
+      if (this.#keyMap.has(e.key)) {
+        this.execButton(this.#keyMap.get(e.key));
+      } else if (!isNaN(e.key)) {
         this.execButton(e.key);
-      } else {
-        this.execButton(keyMap.get(e.key));
       }
-      console.log(e.key);
     });
   }
 
