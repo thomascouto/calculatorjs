@@ -34,6 +34,30 @@ class CalcController {
         b.style.cursor = "pointer";
       });
     });
+
+    this.initKeyboard();
+  }
+
+  initKeyboard() {
+    document.addEventListener("keyup", (e) => {
+      this.execButton(e);
+      let keyMap = new Map();
+      keyMap.set("Enter", "igual");
+      keyMap.set("+", "soma");
+      keyMap.set("-", "subtracao");
+      keyMap.set("*", "multiplicacao");
+      keyMap.set("/", "divisao");
+      keyMap.set("%", "porcento");
+      keyMap.set(".", "ponto");
+      keyMap.set("Escape", "ac");
+
+      if (!isNaN(e.key)) {
+        this.execButton(e.key);
+      } else {
+        this.execButton(keyMap.get(e.key));
+      }
+      console.log(e.key);
+    });
   }
 
   /**
@@ -119,6 +143,13 @@ class CalcController {
       case "9":
         this.doNumberOperation(value);
         break;
+      case "c":
+        if (value.ctrlKey) {
+          console.log("control pressed");
+        }
+        break;
+      default:
+        console.log("Tecla nao mapeada.");
     }
   }
 
@@ -169,33 +200,40 @@ class CalcController {
   }
 
   evalOperation(tempValue, displayValue, operation) {
+    if (parseFloat(displayValue) == 0) {
+      this.#displayCalc.innerHTML = "Err";
+      this.resetParams();
+      return;
+    }
+
     //se tiver % no primeiro operador, realizar logo a conversão para decimal.
     if (tempValue.includes("%")) {
       //remove o %
-      tempValue = tempValue.substring(0, tempValue.length - 1);
-      tempValue = parseFloat(tempValue, 10) / 100;
+      tempValue =
+        parseFloat(tempValue.substring(0, tempValue.length - 1), 10) / 100;
     } else {
       tempValue = parseFloat(tempValue, 10);
     }
 
     //segundo parametro da operação
-    if (displayValue.includes("%")) {
-      //remove o % e converte em float.
-      displayValue =
-        parseFloat(displayValue.substring(0, displayValue.length - 1), 10) /
-        100;
+    if (typeof displayValue == "string") {
+      if (displayValue.includes("%")) {
+        //remove o % e converte em float.
+        displayValue =
+          parseFloat(displayValue.substring(0, displayValue.length - 1), 10) /
+          100;
 
-      if (operation == "+") {
-        displayValue += 1;
-        operation = "*";
-      } else if (operation == "-") {
-        displayValue = 1 - displayValue;
-        operation = "*";
+        if (operation == "+") {
+          displayValue += 1;
+          operation = "*";
+        } else if (operation == "-") {
+          displayValue = 1 - displayValue;
+          operation = "*";
+        }
+      } else {
+        displayValue = parseFloat(displayValue, 10);
       }
-    } else {
-      displayValue = parseFloat(displayValue, 10);
     }
-
     console.log(`tempValue: ${tempValue}
     displayValue ${displayValue}
     operation ${operation}`);
@@ -215,7 +253,11 @@ class CalcController {
       },
     };
 
-    this.#displayCalc.innerHTML = ops[operation](tempValue, displayValue);
+    let result =
+      Math.round(
+        (ops[operation](tempValue, displayValue) + Number.EPSILON) * 10000
+      ) / 10000;
+    this.#displayCalc.innerHTML = result;
     this.#tempValue = this.#displayCalc.innerHTML;
     if (!this.#isLastKeyEqual) {
       this.#isLastKeyEqual = true;
